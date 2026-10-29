@@ -103,4 +103,48 @@ export class UserService {
       throw error;
     }
   }
+
+  async show(id: bigint) {
+    try {
+      const user = await this.prisma.user.findFirstOrThrow({
+        where: { id },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          createdAt: true,
+        },
+      });
+
+      return {
+        ...user,
+        id: user.id.toString(),
+      };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException('User not found.');
+        }
+      }
+      throw error;
+    }
+  }
+  async delete(id: bigint) {
+    try {
+      await this.prisma.user.delete({
+        where: { id },
+      });
+
+      return {
+        message: 'User deleted',
+      };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException('User not found.');
+        }
+      }
+      throw error;
+    }
+  }
 }
