@@ -31,7 +31,42 @@
 $ npm install
 ```
 
-## Compile and run the project
+## Prisma and PostgreSQL
+
+This project uses stable Prisma ORM 7 with the PostgreSQL driver adapter.
+Prisma 8 release candidates are intentionally excluded.
+
+1. Create a dedicated PostgreSQL database for this project.
+2. Copy `.env.example` to `.env` only if `.env` does not already exist. Otherwise,
+   add `DATABASE_URL` to the existing file and preserve the Observe credentials.
+3. Replace the example database URL with your local connection details. Never
+   commit `.env` or use a shared production database for development migrations.
+4. Run:
+
+```bash
+npm run prisma:generate
+npm run prisma:validate
+npm run prisma:migrate -- --name init
+npm run start:dev
+```
+
+The initial `User` model is defined in `prisma/schema.prisma`; migration files
+created by `prisma:migrate` belong in version control. No migration has been
+applied just by installing dependencies or generating the client.
+
+`PrismaModule` exports `PrismaService`. Import this module into each feature module
+that needs database access, then inject `PrismaService` into that feature's service.
+The application connects on startup and disconnects on shutdown. A missing
+`DATABASE_URL` or unavailable database stops startup.
+
+`npm run build` generates the client automatically. For a production release, run
+`npm run prisma:deploy` with the release's database environment before starting
+the app; supply environment variables through the deployment platform.
+
+Unit tests and the root HTTP e2e test run without PostgreSQL; the HTTP test
+overrides the database provider and does not verify database connectivity.
+
+## Run the application
 
 ```bash
 # development
